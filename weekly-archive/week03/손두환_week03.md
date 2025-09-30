@@ -219,16 +219,3 @@ A/B test (이 책에서는 Randomized Control Trial, RCT라고도 부름)가 대
 p value  
 power of the test  
 표본 크기 계산  
-
-# Chapter3 Graphical Causal Model (그래프 인과 모델)
-
-
-## 💡 핵심 질문
-- 일상에서 경험하는 상관관계 vs 인과관계의 예시는?
-- 인과추론이 필요한 실무 상황들은?
-- 잘못된 인과추론으로 인한 의사결정 실패 사례는?
-
-## 🔗 참고 자료
-- [교재 1장: 인과추론 입문]
-- [Simpson's Paradox 설명 자료]
-- [인과추론 기초 개념 정리]
