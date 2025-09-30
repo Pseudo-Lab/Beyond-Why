@@ -219,3 +219,4 @@ A/B test (이 책에서는 Randomized Control Trial, RCT라고도 부름)가 대
 p value  
 power of the test  
 표본 크기 계산  
+
