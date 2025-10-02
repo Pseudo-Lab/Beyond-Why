@@ -5,6 +5,9 @@
 - **주제**: Chapter 1 & Chapter 2
 - **상태**: 진행 완료
 
+## 진행 자료
+- NotebookLM : https://notebooklm.google.com/notebook/ed05869f-2f6a-4f65-9fda-be45f1d9a73f
+
 <!-- 학습 정리 파일이 업로드되면 아래 형식으로 링크 추가
 - [김동섭_week03.md](./김동섭_week03.md)
 -->
