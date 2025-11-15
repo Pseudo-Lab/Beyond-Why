@@ -5,5 +5,5 @@
 - **주제**: Chatper 6. 이질적 처치효과
 - **상태**: 📅 예정
 
-## 🔗 참고 자료
-- 
+## 🔗 진행 자료
+- Docs URL : https://docs.google.com/document/d/1eorUkR1liseyvTJv9i8YL958YvmLNqxV5XUMDemnDys/edit?usp=sharing
