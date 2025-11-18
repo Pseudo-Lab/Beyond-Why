@@ -8,6 +8,11 @@
 **선형회귀에서의 비선형성**  
 처치 선형화
 - 반응함수 $E[Y\mid T,X]$가 비선형일 때 단순 선형회귀로는 안된다.
+  - 비선형인지 테스트 하는법 : Ramsey RESET test 등이 있다. 
+    - 기존 선형회귀 fitting
+    - x^2, x^3등등 term 추가해서 fitting 
+    - 귀무가설: 추가된 term 계수가 0, 대립가설: 추가된 계수가 0이 아님 
+    - Box–Tidwell test도 있음. 그러나 제한된 비선형성만 검정하는거 같아 완벽하지는 않은듯.
 - log, sqrt 등 적용하여 비선형 fitting 해야함
 - 반응함수 $E[Y\mid T,X]$가 비선형일 때 국소선형 근사로서 회귀계수는 평균국소효과를 제공한다. 부분선형모형(semiparametric partial linear model)
 $$
@@ -54,12 +59,22 @@ $$
 회귀분석과 직교화는 훌륭하지만, 독립성 가정을 해야했음: 일부 공변량을 통제했을 때 처치가 무작위로 배정된 것처럼 보이도록 가정해야함.  
 가능하면 무작위 실험하는편이 좋지만, 무작위 통제 실험은 큰 비용이 듦. (채무불이행 가능성인 높은 사람한테 무작위로 신용한도 줘야하는 꺼림칙한 짓을 해야함)  
 이를 해결하기 위해, stratified (계층화) 또는 conditionally 무작위 실험이 제안됨! (이 전 방법은 완전 무작위 실험이라고 부름)  
-공변량에 따라 서로 다른 분포에서 표본을 뽑아 여러 국소 실험을 만듦.  
+공변량에 따라 서로 다른 분포에서 표본을 뽑아 여러 국소 실험을 만듬.  
 
 ### 조건부 무작위 실험
-- 더미(dummies)는 범주화된 처치·집단 효과를 직접적으로 모델링한다. 포화(saturated) 모형에서는 모든 범주별 평균을 추정하므로 그룹별 비교가 직접적이다.
+- 완전 무작위는 아니고, 적당한 분포로 T처리하기 전 샘플을 뽑되, 모든 X를 span하기는 하게 함.
+  1. T처리하기 전 샘플들을 even하게 뽑지 않고, 약간 외곡을 준다.
+  2. 각 신용점수 별로 그룹핑, 분포를 계산해서 그 빈도대로 후보들 세팅
+  3. 예를들어 50%확률로 T처리해서 각 bin k별로 ATE계산한 다음 가중평균
+  - 신용한도 낮은사람한테 채무이행률을 테스트하는 부담을 줄이는 목적
+  - ATE계산 시 직접 group개념이 쓰이는게 아니고, T 처리 전 샘플링에만 사용된다.
 - 그룹 수가 적을수록 덜 복잡해진다.
-- 그룹 간 처치분포가 곂칠수록 좋다. 양수성 가정이 지켜지니까. 양수성 가정이 깨지면 위험한 외삽에 의존해야했었음.
+- 그룹 간 처치분포가 곂칠수록 좋다. 양수성 가정이 지켜지니까. 양수성 가정이 깨지면 위험한 외삽(parametric model로 샘플링)에 의존해야했었음.
+  - 하지만, 실제 샘플이 없다면 결국 양수성 가정 깨짐
+  - 해결법: 
+    - 더 넓은 bin으로 통합 (coarsening)
+    - 모델 기반 추정 (parametric extrapolation)
+    - 성향점수 매칭(IPW, matching)
 - 물론, 그룹수가 적고, 곂치는 부분이 많을수록 큰 비용이 들어가서 적당한 trade off를 해야함.
 
 더미변수
@@ -205,21 +220,78 @@ double robustness: 4장의 직교화 + 성향점수 가중치
 **balancing score**
 - 처치의 조건부 확률, $P(T \mid X)$나 성향점수($e(x)$)로 표현
 - X를 T로 변환하는 일종의 함수 (?)
-- 교란요인 X를 직접 통제할 필요 없이 CIA를 만족할 수 있다는 깨달음에서 비롯함 (? 이게 되나)  
+- 교란요인 X를 직접 통제할 필요 없이 CIA를 만족할 수 있다는 깨달음에서 비롯함
 - 교란요인을 통제하는 대신, $E[T \mid X]$를 추정하는 balancing score를 통제해도 충분!  
-- 차원축소 기법으로도 볼 수 있음
-  - 고차원인 X를 조건부로 설정하지 말고, 성향점수 P(x)를 활용:  $(T_1, Y_0) \perp T \mid P(x)$
+- e(X)를 알면, X만으로는 T에 관한 추가정보를 얻을 수 없다. 즉 X를 직접 통제할 때와 동일한 효과가 나옴 (X to Y를 통제할수는 없긴하지만, 나중에 나오지만 이 방법들은 샘플 분포 자체를 바꿔서 추론하는 것이므로 효과는 있는듯)
+$$ 
+\begin{array}{ccccccccc}
+ & & X & & \\
+ & \swarrow & & \searrow & \\
+ e(X) & \rightarrow & T & \rightarrow & Y
+\end{array}
+$$
+
+- Balancing Score Theorem: 고차원 공변량 $X$ 전체를 조건부로 두지 않고,
+  성향점수 $p(X) = P(T=1\mid X)$ 만을 조건부로 두어도
+  $$(Y_1, Y_0) \perp T \mid p(X)$$
+  가 성립한다. (차원축소로 해석 가능)
+  - 증명  
+      여기서 $P(\cdot)$는 확률연산자, $E[\cdot]$는 기대값, 성향점수는 $p(X) := P(T=1\mid X)$ 로 둔다. 또한 CIA: $(Y_0, Y_1)\perp T \mid X$ 성립함 가정.
+
+    $$
+    \begin{aligned}
+    P(T=1 \mid Y_j,\, p(X))
+    &= E[T \mid Y_j,\, p(X)] \\[4pt]
+    &= E\!\left[\,E[T \mid Y_j,\, p(X),\, X] \mid Y_j,\, p(X)\,\right] 
+    \quad (\text{iterated expectation}) \\[4pt]
+    &= E\!\left[\,E[T \mid X] \mid Y_j,\, p(X)\,\right]
+    \quad (\text{CIA: } (Y_0,Y_1)\!\perp\!T \mid X \text{, p(X) can be expressed by X}) \\[4pt]
+    &= E\!\left[\,p(X) \mid Y_j,\, p(X)\,\right]
+    \quad (\text{definition: } p(X)=P(T=1\mid X)) \\[4pt]
+    &= p(X)
+    \quad (\text{conditional expectation rule: } E[Z\mid Z,W]=Z)
+    \end{aligned}
+    $$
+     
+    > [참고: sufficient statistic]  
+    > 성향점수는 $p(X) := P(T=1\mid X)$ 로 정의된다. 이때
+    > $$
+    > \begin{aligned}
+    > P(T=1\mid p(X))
+    > &= \mathbb{E}\big[\,P(T=1\mid X)\mid p(X)\,\big]  \\
+    > &= \mathbb{E}\big[\,p(X)\mid p(X)\,\big]  \\
+    > &= p(X).
+    > \end{aligned}
+    > $$
+    > (조건부기대값 성질 $E[Z\mid Z,W]=Z$ 사용.)  
+    > 특히 $T\in\{0,1\}$ 이진 처치이므로,
+    > 모든 $t\in\{0,1\}$ 에 대해
+    > $$P(T=t\mid X) = P(T=t\mid p(X))$$
+    > 가 성립한다.  
+    > 따라서 $p(X)$는 $T$에 대한 $X$의 정보를 완전히 요약하는 
+    > 충분통계(sufficient statistic)이자 balancing score이며,
+    > 조건부로 보면
+    > $$T \perp X \mid p(X)$$
+    > 이다.
+
+    따라서
+    $$P(T=1 \mid Y_j, p(X)) = p(X) = P(T=1 \mid p(X)),$$
+    즉 조건부 분포가 $Y_j$에 의존하지 않으므로
+    $$T \perp Y_j \mid p(X)$$
+  가 성립한다.
+    
 - e(x)를 실제로 알수는 없고, 추정해야함
   - 머신러닝으로 해도되지만
     - calibrated probability가 나와야하고
     - overfitting에 의한 bias를 피하기위한 out of fold 방식의 예측이 필요함
-  
+
 **Propensity Score Matching (PSM, 성향점수 매칭)**  
 - matching estimator: 성향점수를 통제하는 다른 방법  
 - 관측가능한 특징이 비슷한 실험대상의 짝을찾아서 실험군(T=1), 대조군(T=0)를 비교함  
 - KNN같은 매칭알고리즘 사용하여 counterfactual data를 생성함  
 $$\hat{ATE} = \frac{1}{N}\sum{\{(Y_i-Y_{jm}(i))T_i+(Y_{jm}(i)-Y_i)(1-T_i) \}}$$
 - 잘 알려져있는 방법이긴 하지만, 편향될 가능성이 있고, 분산을 추정하기 어렵고, KNN이 고차원이면 느려서 별로라고 함.  
+- TODO:FIXME: 이게 구체적으로 어떤건지, 
 
 ## Inverse Propensity Weighting (IPW, 역확률 가중치)
 - PSM이외에도 성향점수를 활용하는 일반적인 방법.  
@@ -266,6 +338,13 @@ P(T/X)값 추정을 완벽하게 잘해버리면, 대조군이 남지않게되�
 
 회귀분석은 실제 데이터가 없는 영역까지 외삽하지만(parametric 가정), IPW는 잠재적 결과의 형태에 대해 아무런 가정도 하지 않아서 ATE추정이 어려울 수 있다.  
 
+질문: e fitting 기준은 머신러닝 모델 rmse줄이는거 같고, 이를 통해 IPW로 새로 샘플링을 하고 인과추론 통계량을 선형회귀로 구함. 하지만 e fitting 단계에서 인과추론양 까지 고려할 수 있을까? 
+하지만, 문제가 생긴다!
+  1. 데이터 스누핑(data snooping) / post-treatment bias
+    - 결과 Y를 보면서 e(X)나 샘플링 방법을 조정하면, 결과에 맞춘 설계(result-driven design)이 되어 편향이 생긴다.
+    - 특히 ML 기반 모델에서 과적합과 유사하게, 실험 설계가 Y의 분포에 맞춰지므로 causal validity가 붕괴된다.
+  2. 표준오차 과소추정
+    - 설계와 분석이 한꺼번에 수행되면, 불확실성이 하나의 단계로만 계산되어 과도하게 낙관적인 신뢰구간이 만들어진다.
 
 ## design-based vs model-based identification
 회귀분석, IPW 중 언제 어떤 방법을 사용하는게 좋은가?  
@@ -297,6 +376,10 @@ $$
 
 결과모델은 정확하고, 성향점수모델이 이상한 경우: 좌항만 남고 우항은 0에 수렴  
 결과모델 이상하고, 성향점수 모델이 정확한 경우: $\frac{1}{N}\sum \frac{TY}{\hat{e}(X)}$만 남고, 이는 IPW추정량으로 성향점수 모델이 정확하므로 이 값도 정확함.  
+
+TODO:FIXME: 얘는 뭔데 이런 식이 타당한건가? 
+둘 다 이상하면 어쩔수 없겠지? X가 이상해서 T, Y 추정 둘다 어려운 경우?  
+
 
 이를 활용해 ATE구하기:
 $$
