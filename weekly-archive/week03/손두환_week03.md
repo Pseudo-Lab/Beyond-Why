@@ -92,6 +92,10 @@ systemic error(체계적 오차), random error(무작위 오차): systemic error
 **내적타당성(internal validity)**: 조사연구의 설계 및 분석과정에서 추정된 원인과 결과에 관계에 대한 인과적추론이 어느정도 정확했는지에 관한 것  
 **외적타당성(external validity)**: 조사연구의 결론을 다른 형태의 측정수단을 사용했을 때, 또는 다른 모집단, 상황 및 시점에 어느 정도까지 일반화시킬 수 있는지  
 
+독립성 가정 동의어:  
+ $$(Y_0, Y_1) \perp T \mid X$$ 
+ignorability(무시가능성), exogeneity(외생성), exchangability(교환가능성), Conditional Independence Assumption (CIA), Unconfoundedness, 비기대성
+
 ## 통계 개념
 상관이 낮다: 는 것은 단지 직선으로 연결하기 어렵다는 뜻 (선형관계만 없지, 비선형 관계는 있을 수 있음)  
 독립: 아예 두 변수가 서로 영향을 주거나 받지 않는다는 훨씬 강한 말. (선형, 비선형 관계 모두 없음)  
