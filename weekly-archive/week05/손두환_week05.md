@@ -180,6 +180,20 @@ partial identification (부분 식별)
 ## selection bias (선택 편향)  
 교란편향: 처치, 결과의 공통원인을 통제하지 않았을 때.  
 선택편향: collider 구조에서, 공통 효과와 매개자에 대한 조건부와 관련됨.  
+  - 예시: T를 랜덤으로 뿌려서 진행함. 그래서 모든 샘플들에 설문조사를 실행해서, (일부만 대답할것임) T=1인 그룹이 순고객추천지수(NPS)가 더 높았음. 이 결과를 그대로 활용해도 될까? 아님!!  
+  - 공통효과인 설문응답에 조건이 걸리면, 신규기능과 고객만족도에 새로운 경로가 열려버림
+  - 즉, 직접적인 인과경로 외에 새로운 경로(bias)가 생김
+  $$
+\begin{array}{cccccccc}
+ & & \text{랜덤성} & & \\
+ & & \downarrow & & \\
+ & & \text{신규기능} & \rightarrow &\text{고객만족도}\\
+ & & \downarrow & \swarrow &  \downarrow \\
+ & & \text{설문응답} & & \text{NPS}
+\end{array}
+$$
+
+
 즉, 실제로는 독립이던 변수들이 “표본에 들어온다는 조건”을 걸면 (conditioning on selection) 서로 종속(dependent) 이 되어버린다.
 
 결과의 효과에 조건부를 두기만해도 selection bias가 생길 수 있다. 그 효과와 처치가 공유되지 않더라도. 이를 virtual collider라고 함. 선택편향은 복잡한 주제임! 더 공부하려면 [Carlos Cinelli et al., 2020](https://ftp.cs.ucla.edu/pub/stat_ser/r493.pdf)
