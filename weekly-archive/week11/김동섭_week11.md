@@ -28,15 +28,11 @@
 Meta-learner 기반 CATE 해석이 인과적으로 의미 있으려면  
 비교란성(ignorability/unconfoundedness)이 반드시 성립해야 함.
 
-$$ (Y(0), Y(1)) \perp T \mid X $$
+$$(Y(0), Y(1)) \perp T \mid X$$
 
-연속 처치에서는 다음이 성립해야 함.
+연속 처치에서는 다음이 성립해야 함.  
 
-$$
-\frac{\partial}{\partial t}E[Y(t) \mid X]
-=
-\frac{\partial}{\partial t}E[Y \mid T=t, X]
-$$
+$$\frac{\partial}{\partial t}E[Y(t) \mid X] = \frac{\partial}{\partial t}E[Y \mid T=t, X]$$
 
 ---
 
@@ -92,15 +88,9 @@ $$
 - $$\hat{\tau}_0(x) \approx E[D_0 \mid X=x, T=0]$$
 
 4) 가중 결합  
-   성향점수 \( \hat{e}(x)=P(T=1\mid X=x) \)을 사용하여
+   성향점수 \( \hat{e}(x)=P(T=1\mid X=x) \)을 사용하여  
 
-$$
-\hat{\tau}(x)
-=
-w(x)\hat{\tau}_1(x)
-+
-(1-w(x))\hat{\tau}_0(x)
-$$
+$$\hat{\tau}(x) = w(x)\hat{\tau}_1(x) + (1-w(x))\hat{\tau}_0(x)$$
 
 보통 \(w(x)=\hat{e}(x)\) 또는 집단 크기 비율 기반 weight.
 
@@ -117,11 +107,7 @@ $$
 
 CATE는 보통 한계효과(marginal effect):
 
-$$
-\tau(x)
-=
-\frac{\partial}{\partial T} E[Y \mid X=x, T]
-$$
+$$\tau(x)=\frac{\partial}{\partial T} E[Y \mid X=x, T]$$
 
 ---
 
@@ -131,9 +117,7 @@ $$
 
 단일 모델로 전체 dose–response 곡선을 적합:
 
-$$
-\hat{\mu}(x,t) \approx E[Y \mid X=x, T=t]
-$$
+$$\hat{\mu}(x,t) \approx E[Y \mid X=x, T=t]$$
 
 - 이진 처치: \(\hat{\mu}(x,1)-\hat{\mu}(x,0)\)
 - 연속 처치: 기울기 계산
@@ -142,19 +126,11 @@ $$
 
 이론형:
 
-$$
-\hat{\tau}(x) 
-= 
-\frac{\partial}{\partial T}\hat{\mu}(x, T)
-$$
+$$\hat{\tau}(x) = \frac{\partial}{\partial T}\hat{\mu}(x, T)$$
 
 실무형(차분):
 
-$$
-\hat{\tau}(x) 
-\approx 
-\frac{\hat{\mu}(x, T+\delta) - \hat{\mu}(x, T)}{\delta}
-$$
+$$\hat{\tau}(x) \approx \frac{\hat{\mu}(x, T+\delta) - \hat{\mu}(x, T)}{\delta}$$
 
 #### 장점
 - 구조 단순 / 구현 쉬움
@@ -185,52 +161,27 @@ $$\hat{\mu}_t(X) \approx E[T \mid X]$$
 
 잔차 생성:
 
-$$
-\tilde{Y}_i = Y_i - \hat{\mu}_y(X_i)
-$$
+$$\tilde{Y}_i = Y_i - \hat{\mu}_y(X_i)$$  
 
-$$
-\tilde{T}_i = T_i - \hat{\mu}_t(X_i)
-$$
+$$\tilde{T}_i = T_i - \hat{\mu}_t(X_i)$$
 
 #### 2) ATE 추정
 
 단순 회귀:
 
-$$
-\tilde{Y}_i
-=
-\tau \cdot \tilde{T}_i + \epsilon_i
-$$
+$$\tilde{Y}_i=\tau \cdot \tilde{T}_i + \epsilon_i$$
 
 → nuisance 모형 오류에 강한 **Neyman-orthogonality** 구조
 
 #### 3) CATE 확장 (R-loss)
 
-CATE 함수 \(\tau(X)\)는 다음 loss를 최소화하는 함수:
+CATE 함수 \(\tau(X)\)는 다음 loss를 최소화하는 함수:  
 
-$$
-\hat{L}_n(\tau)
-=
-\frac{1}{n}
-\sum_{i=1}^{n}
-\left(
-Y_i
--
-\hat{\mu}_y(X_i)
--
-\tau(X_i)\cdot
-(T_i - \hat{\mu}_t(X_i))
-\right)^2
-$$
+$$\hat{L}_n(\tau)=\frac{1}{n}\sum_{i=1}^{n}\left(Y_i-\hat{\mu}_y(X_i)-\tau(X_i)\cdot(T_i - \hat{\mu}_t(X_i))\right)^2$$
 
-직관적으로는,
+직관적으로는,  
 
-$$
-\frac{\tilde{Y}_i}{\tilde{T}_i}
-\approx 
-\tau(X_i)
-$$
+$$\frac{\tilde{Y}_i}{\tilde{T}_i}\approx \tau(X_i)$$
 
 이고, 가중치 \(\tilde{T}_i^2\)로 회귀하는 것과 동치.
 
