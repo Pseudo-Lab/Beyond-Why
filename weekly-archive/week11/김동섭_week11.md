@@ -3,7 +3,7 @@
 ## 0. Meta-learner 개요
 
 **Meta-learner**는 원래 목적이 *결과 예측*인 일반 머신러닝 모델  
-(예: \( \hat{\mu}(X) \approx E[Y \mid X] \))을 재조합하여,
+(예: \(\hat{\mu}(X) \approx E[Y \mid X]\))을 재조합하여,
 
 > “누가 처치를 받았을 때 얼마나 이득을 보는가?”  
 > 즉, **개별 처치 효과(CATE, Conditional Average Treatment Effect)**  
@@ -15,7 +15,7 @@
 
 - **Outcome modeling 접근**  
   - 잔차처리(orthogonalization)나 IPW(역확률 가중) 없이도  
-    \( E[Y \mid X, T] \)를 잘 예측하는 모델을 통해 CATE를 간접 복원.
+    \(E[Y \mid X, T]\)를 잘 예측하는 모델을 통해 CATE를 간접 복원.
 - **표현 학습에 강함**  
   - 비선형 관계, 고차원 공변량, 복잡한 상호작용 등을  
     일반 ML 모델(XGBoost, RF, NN 등)로 캡처한 뒤 인과 추론에 재활용.
@@ -40,9 +40,9 @@ $$\frac{\partial}{\partial t}E[Y(t) \mid X] = \frac{\partial}{\partial t}E[Y \mi
 
 이진 처치: \(T \in \{0, 1\}\)
 
-- $$\mu_1(x) = E[Y \mid X=x, T=1]$$  
-- $$\mu_0(x) = E[Y \mid X=x, T=0]$$  
-- $$\tau(x) = E[Y(1)-Y(0)\mid X=x]$$  
+- \(\mu_1(x) = E[Y \mid X=x, T=1]\)  
+- \(\mu_0(x) = E[Y \mid X=x, T=0]\)  
+- \(\tau(x) = E[Y(1)-Y(0)\mid X=x]\)  
 
 ---
 
@@ -62,7 +62,7 @@ $$\frac{\partial}{\partial t}E[Y(t) \mid X] = \frac{\partial}{\partial t}E[Y \mi
 - 두 집단의 구조적 차이를 각각 따로 학습 가능
 
 #### 단점
-- 두 모델을 독립 학습 → **분산 커짐**
+- 두 모델을 독립 학습 → **CATE 추정 분산 커짐**
 - 표본 불균형 시 작은 집단은 **자기정규화 → underfitting**  
 - 희귀 처치일수록 불안정
 
@@ -70,7 +70,9 @@ $$\frac{\partial}{\partial t}E[Y(t) \mid X] = \frac{\partial}{\partial t}E[Y \mi
 
 ### 7.1.2 X-learner (Cross-learning)
 
-> 누락된 반사실을 cross-impute → pseudo-treatment effect 생성 → CATE을 다시 스무딩
+핵심 아이디어:
+
+> 누락된 반사실을 cross-impute → pseudo-treatment effect 생성 → CATE를 다시 스무딩
 
 #### 절차
 
@@ -84,11 +86,11 @@ $$\frac{\partial}{\partial t}E[Y(t) \mid X] = \frac{\partial}{\partial t}E[Y \mi
   $$D_0 = \hat{\mu}_1(X) - Y$$
 
 3) 두 pseudo-effect 모델 학습
-- $$\hat{\tau}_1(x) \approx E[D_1 \mid X=x, T=1]$$
-- $$\hat{\tau}_0(x) \approx E[D_0 \mid X=x, T=0]$$
+- \(\hat{\tau}_1(x) \approx E[D_1 \mid X=x, T=1]\)  
+- \(\hat{\tau}_0(x) \approx E[D_0 \mid X=x, T=0]\)
 
 4) 가중 결합  
-   성향점수 \( \hat{e}(x)=P(T=1\mid X=x) \)을 사용하여  
+   성향점수 \(\hat{e}(x)=P(T=1\mid X=x)\) 등을 사용하여  
 
 $$\hat{\tau}(x) = w(x)\hat{\tau}_1(x) + (1-w(x))\hat{\tau}_0(x)$$
 
@@ -97,7 +99,7 @@ $$\hat{\tau}(x) = w(x)\hat{\tau}_1(x) + (1-w(x))\hat{\tau}_0(x)$$
 #### 직관
 
 - 표본이 많은 집단에서 나온 pseudo-effect를 더 신뢰
-- **표본 불균형에서 매우 강함**
+- **처치군/대조군 표본 불균형에서 T-learner보다 훨씬 안정적**
 
 ---
 
@@ -120,17 +122,10 @@ $$\tau(x)=\frac{\partial}{\partial T} E[Y \mid X=x, T]$$
 $$\hat{\mu}(x,t) \approx E[Y \mid X=x, T=t]$$
 
 - 이진 처치: \(\hat{\mu}(x,1)-\hat{\mu}(x,0)\)
-- 연속 처치: 기울기 계산
+- 연속 처치: \(t\)에 따른 기울기로 한계효과 해석
 
-#### 한계효과 추정
-
-이론형:
-
-$$\hat{\tau}(x) = \frac{\partial}{\partial T}\hat{\mu}(x, T)$$
-
-실무형(차분):
-
-$$\hat{\tau}(x) \approx \frac{\hat{\mu}(x, T+\delta) - \hat{\mu}(x, T)}{\delta}$$
+실무에서는 보통 미세한 \(\delta\)를 두고  
+\(\hat{\mu}(x, T+\delta) - \hat{\mu}(x, T)\)를 나눈 값으로 근사.
 
 #### 장점
 - 구조 단순 / 구현 쉬움
@@ -147,43 +142,42 @@ $$\hat{\tau}(x) \approx \frac{\hat{\mu}(x, T+\delta) - \hat{\mu}(x, T)}{\delta}$
 ### 7.2.2 R-learner (Double/Debiased ML)
 
 핵심:  
-> FWL 정리를 머신러닝으로 확장 → 결과/처치 관계에서 X의 영향 제거(잔차화)
+
+> FWL 정리를 머신러닝으로 확장 → 결과/처치에서 X의 영향 제거(잔차화) 후 효과 추정
 
 #### 1) 잔차 생성 단계
 
 Outcome nuisance model:
 
-$$\hat{\mu}_y(X) \approx E[Y \mid X]$$
+\(\hat{\mu}_y(X) \approx E[Y \mid X]\)
 
 Treatment nuisance model:
 
-$$\hat{\mu}_t(X) \approx E[T \mid X]$$
+\(\hat{\mu}_t(X) \approx E[T \mid X]\)
 
 잔차 생성:
 
-$$\tilde{Y}_i = Y_i - \hat{\mu}_y(X_i)$$  
+- \(\tilde{Y}_i = Y_i - \hat{\mu}_y(X_i)\)  
+- \(\tilde{T}_i = T_i - \hat{\mu}_t(X_i)\)
 
-$$\tilde{T}_i = T_i - \hat{\mu}_t(X_i)$$
+#### 2) ATE 추정 (가장 단순한 형태)
 
-#### 2) ATE 추정
+잔차 간 단순 회귀:
 
-단순 회귀:
+$$\tilde{Y}_i = \tau \cdot \tilde{T}_i + \epsilon_i$$
 
-$$\tilde{Y}_i=\tau \cdot \tilde{T}_i + \epsilon_i$$
+여기서 \(\tau\)가 ATE.  
+이 구조가 nuisance 모형의 작은 오차에 강한 **Neyman-orthogonality**를 가진다.
 
-→ nuisance 모형 오류에 강한 **Neyman-orthogonality** 구조
+#### 3) CATE 확장 (아이디어만)
 
-#### 3) CATE 확장 (R-loss)
+- \(\tau\)를 상수 대신 \(\tau(X)\) 함수로 두고,  
+- \(\tilde{Y}_i \approx \tau(X_i)\tilde{T}_i\) 관계가 잘 맞도록  
+  \(\tau(\cdot)\)를 회귀/ML로 학습한다.
+- 이때의 손실 함수를 R-loss라고 부르며,  
+  이를 최소화하는 \(\tau(X)\)가 CATE 추정치.
 
-CATE 함수 \(\tau(X)\)는 다음 loss를 최소화하는 함수:  
-
-$$\hat{L}_n(\tau)=\frac{1}{n}\sum_{i=1}^{n}\left(Y_i-\hat{\mu}_y(X_i)-\tau(X_i)\cdot(T_i - \hat{\mu}_t(X_i))\right)^2$$
-
-직관적으로는,  
-
-$$\frac{\tilde{Y}_i}{\tilde{T}_i}\approx \tau(X_i)$$
-
-이고, 가중치 \(\tilde{T}_i^2\)로 회귀하는 것과 동치.
+(구체적인 수식은 생략하고, **“잔차 공간에서 T→Y의 기울기를 X별로 학습한다”** 정도로 이해해도 충분함.)
 
 #### 장점
 
@@ -195,7 +189,7 @@ $$\frac{\tilde{Y}_i}{\tilde{T}_i}\approx \tau(X_i)$$
 #### 단점
 
 - nuisance 모델이 ML → 과적합 위험
-- **cross-fitting 필수**
+- **cross-fitting(폴드 나눠 out-of-fold 예측으로 잔차 생성) 사실상 필수**
 
 ---
 
@@ -206,7 +200,7 @@ $$\frac{\tilde{Y}_i}{\tilde{T}_i}\approx \tau(X_i)$$
 | **T-learner** | 단순·구현 쉬움 | 분산 큼, 불균형 취약 | 표본 균형·데이터 많음 |
 | **X-learner** | 불균형에 강함 | 약간 복잡 | T=1/0 표본 격차 클 때 |
 | **S-learner** | 연속·이진 일관 프레임 | shrinkage bias | 연속 처치 baseline |
-| **R-learner** | 편향 제거 최고, 이론 강함 | 구현·튜닝 난도 높음 | 정확한 CATE가 핵심일 때 |
+| **R-learner** | 편향 제거 강함, 이론 탄탄 | 구현·튜닝 난도 높음 | 정확한 CATE가 핵심일 때 |
 
 ---
 
