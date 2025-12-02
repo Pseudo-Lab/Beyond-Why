@@ -61,9 +61,10 @@ $\hat\mu(X)_{\tau1}\approx E[\tau(X) \mid T=1]$
 
 (4) 최종 CATE: 가중평균 형태  
 $\hat{\tau}(x)=\hat\mu(X)_{\tau0}\hat{e}(X)+\hat\mu(X)_{\tau1}(1-\hat{e}(X))$  
-여기서 $e(X)=P(T=1\mid X)$ 또는 다른 weight
+여기서 $e(X)=P(T=1\mid X)$ 또는 다른 weight (propensity score가 이론적으로 추천되는 기본옵션)
 
-* TODO:FIXME: X-learner의 단점? 
+* T-learner가 X-learner보다 좋은경우?  
+두 집단(처치/대조군)의 데이터가 서로 충분히 크고, 함수 형태가 매우 다르며, cross-imputation을 할 이유가 없을 때.
 
 > 참고) 281page, X learner, domain adaptation learner 차이 (DAL설명은 거의 안하긴 함)
 > | 요소 | X-learner | Domain Adaptation Learner | | |
@@ -74,7 +75,6 @@ $\hat{\tau}(x)=\hat\mu(X)_{\tau0}\hat{e}(X)+\hat\mu(X)_{\tau1}(1-\hat{e}(X))$
 > | 사용 상황             | 샘플 수가 처치 vs 대조군에서 크게 다를 때 유리                                  | $P(X \mid T=1) \neq P(X \mid T=0)$ 로 **포지션 매우 다를 때** 유리 |
 > | 모델 구성             | outcome model 2개 + pseudo TE model 2개                         | 하나의 인코더/representer + predictor + domain classifier 등이 조합                    |            |                          |
 > | 성격                | **Meta-learner**                                              | **Representation-based CAUSAL learner**                                      |            |                          |
-
 
 # **Ⅱ. Continuous Treatment Meta-learners**
 상황설정: 6개 레스토랑에서 할인을 무작위로 제공, 언제 더 많은 할인을 제공하면 좋을지 분석  
