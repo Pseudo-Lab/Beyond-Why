@@ -212,7 +212,7 @@ $$CATE = E[(Y_{1i} - Y_{0i}) | X=x]$$
 treatment variable이 연속형일 때는 편미분 사용함.  
 $$CATE = \frac{\partial}{\partial t}E[Y_i] $$
 
-cf: 국소 평균적 인과효과 (Local Average Treatment Effect, LATE): 도구변수(IV)를 사용할 때, 컴플라이어(compliers) 집단에서의 평균적 인과효과
+cf: 국소 평균적 인과효과 (Local Average Treatment Effect, LATE): 도구변수(IV)를 사용할 때, 컴플라이어(compliers) 집단에서의 평균적 인과효과. 순응자가 있는 경우에만 정의됨.  
 
 ## Bias (편향)
 인과관계와 연관관계를 다르게 만드는 요소  
@@ -314,6 +314,8 @@ $Power = 1 − \beta$
 충분히 큰 표본이면 작은 효과도 탐지 가능.
 
 ### 표본 크기 계산  
+TODO:FIXME: Mininum Detectable Effect(MDE) 개념 추가  
+
 주어진 유의수준(α)과 검정력(1−β)을 만족하면서
 관심 있는 효과 크기(δ)를 검출할 수 있는 최소 표본 수 n을 구하는 것.
 $$
