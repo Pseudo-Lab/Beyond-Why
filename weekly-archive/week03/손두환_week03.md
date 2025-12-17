@@ -93,8 +93,17 @@ systemic error(체계적 오차), random error(무작위 오차): systemic error
 **외적타당성(external validity)**: 조사연구의 결론을 다른 형태의 측정수단을 사용했을 때, 또는 다른 모집단, 상황 및 시점에 어느 정도까지 일반화시킬 수 있는지  
 
 독립성 가정 동의어:  
- $$(Y_0, Y_1) \perp T \mid X$$ 
-ignorability(무시가능성), exogeneity(외생성), exchangability(교환가능성), Conditional Independence Assumption (CIA), Unconfoundedness, 비기대성
+$(Y_0, Y_1) \perp T \mid X$  
+처치가 잠재결과를 "보지 않고" 배정된다는 가정  
+- ignorability(무시가능성),  
+- exogeneity(외생성),  
+  - 회귀분석, 계량경제학 맥락에서 주로 사용된다.
+  - 의미는 대체로 E[ε∣T,X]=0
+  - 이는 결과방정식의 오차와 처치가 독립이라는 조건
+- exchangability(교환가능성),  
+- Conditional Independence Assumption (CIA),  
+- Unconfoundedness,  
+- 비기대성
 
 ## 통계 개념
 상관이 낮다: 는 것은 단지 직선으로 연결하기 어렵다는 뜻 (선형관계만 없지, 비선형 관계는 있을 수 있음)  
