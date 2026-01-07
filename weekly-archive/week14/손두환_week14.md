@@ -10,6 +10,8 @@
 3. inverse propensity score에서 가상의 샘플을 만드는 것과 차이?
   - ips로 패널데이터에 적용하는 내용은 없었긴 함
 4. convexity constraint (볼록성 제약조건)이 최적화 문제에 대한 sparsity 해결법을 어떻게 주는걸까? 수학적 배경?
+5. 처치 전, 처치 후 샘플이 모두 비결측이란 가정이 panel 데이터를 씀으로 만족되는 것 같은데, pre에서 전혀 본 적 없는 새로운 sample을 반영해서 ATT계산하고싶으면 어떡할까? 
+pre혹은 post기간에 결측이 생기면 어떡해야할까?
 
 ## 개요
 이중차분법이랑 다른 방법!  
@@ -168,7 +170,7 @@ $T_{pre}$수가 적으면 과적합이 발생할 수 있다. 이에 SCM은 편�
 5. k별로 1~4과정을 거치고 k개 ATT추정값을 평균내서 최종 ATT값 하나를 얻는다.
 
 ## 추론(Inference)
-- 편향제거 과정은 그 자체로 유용하지만, ATT추정값 주위에 신뢰구간 설정이 가능해서 더 중요하다.  
+- 편향제거 과정은 그 자체로 유용하지만, ATT추정값 주위에 신뢰구간 설정이 가능해서 더 좋은 방법이었음.  
 - 그러나 추론에 문제점: 대조군이 적은 경우, 실험대상축으로 (시간축이 아닌)bootstrap하는 방법은 부적절하다. 
   - bootstrap 가정은 재표집이 표본분포를 근사한다는 것
   - 보통 대조군 샘플은 적은게 흔하므로 부적절
@@ -183,7 +185,7 @@ $T_{pre}$수가 적으면 과적합이 발생할 수 있다. 이에 SCM은 편�
 ## 합성 이중차분법 (Synthetic DID, SDID)
 SCM과 DID의 연관성에 대한 고찰, 두 방법을 합쳐 이중차분법 추정량으로 결합하는 방법을 다룸. [Dmitry Arkhangelsky et al., 2021](https://arxiv.org/pdf/1812.09970)의 간소화 버전임.
 
-**SC는 단위 방향 balancing, DID는 시간 방향 balancing인데, SDID는 둘 다 한다**
+**SCM은 단위 방향 balancing, DID는 시간 방향 balancing인데, SDID는 둘 다 한다**
 - SCM
   - 단위별로 가중치 $\hat \omega_i$
     - 단위 간 수준 차이를 보정(match)하는 역할은 하지만, 이 알고리즘이 단위고정효과를 포함했다고는 얘기 안한다.
@@ -212,7 +214,7 @@ $$
     - 균일 가중치인 $N_{tr}/N$
 
 여기서는 대상고정효과 $\alpha_i$가 빠져있음. 이를 추가한 것이 합성이중차분법 (SDID)임.  
-  - $$ \hat{\tau}^{sc}= \argmin_{\mu, \alpha, \beta,\tau}\left\{ 
+  $$ \hat{\tau}^{sc}= \argmin_{\mu, \alpha, \beta,\tau}\left\{ 
     \sum^N_{n=1} \sum^T_{t=1}(Y_{it}-(\mu+\alpha_i+\beta_t+\tau W_{it}))^2 \hat\omega_i \hat\lambda_t
     \right\}
     $$
