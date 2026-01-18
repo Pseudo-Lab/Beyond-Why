@@ -183,3 +183,67 @@ $$
 - 방법: (cross-fitting 진행했다는 것을 가정으로 함)
     - cross-fitting 기반으로 구해진 여러개의 ATT를 기반으로 표준오차 추정값(=SE)구함
     - 검정통계량 = ATT 추정량 / SE 구한 뒤 T분포 사용하여 신뢰구간 구할 수 있음
+
+ 
+### 합성 이중차분법(SDID; Synthetic Difference In Difference)
+---
+
+- 이중차분법 복습
+
+$$
+\hat{\tau}^{did}=\argmin_{\mu, \alpha, \beta, \tau}{{ \sum_{n=1}^{N} \sum_{t=1}^{T}(Y_{it}-(\mu+\alpha_{i}+\beta_{t}+\tau W_{it}))^2}}
+$$
+        
+- 통제집단합성법 복습
+	- 아래의 수식에 따라 가중회귀분석을 수행했을 때 회귀계수와
+	- 위에서 다루었던 통제집단합성법 로직에 따라 구해진 ATT가 동일하다는 것을 보여주어
+	- 아래 수식이 맞는 이유에 대해 보여주고 있음
+
+$$
+\hat{\tau}^{sc}=\argmin_{\beta, \tau}{\sum_{n=1}^{N}{\sum_{t=1}^{T}{(Y_{it}-(\beta_{t}+\tau W_{it}))^2 \hat{\omega_{i}}^{sc}}}}
+$$
+
+- 합성이중차분법의 아이디어
+    - 이중차분법: 대상고정효과 O, 시간고정효과 O, **실험대상에 대한 가중치 X**
+    - 통제집단합성법: **대상고정효과 X**, 시간고정효과 O, 실험대상에 대한 가중치 O
+    - → 합성이중차붑법: **대상고정효과 O**, 시간고정효과 O, **실험대상 가중치** O + **시간가중치 O (추가)**
+- 합성이중차분법 방법
+    - 1) 실험대상에 대한 가중치 구함
+        - 적합 모델: (처치 전 기간 대조군) → (처치 전 기간 실험군) 모델 적합
+        - X 데이터 형태: (일자, 대조군 개체별 Y)
+        - Y 데이터 형태: (일자, 평균 Y)
+        - 특이 사항: 절편이동 비허용 (= 외삽 비허용)
+    - 2) 시간가중치 구함
+        - 모델 적합: (처치 전 기간 대조군) → (처치 후 기간 대조군)
+        - X 데이터 형태: (대조군 개체, 일자별 Y)
+        - Y 데이터 형태: (대조군 개체, 평균 Y)
+        - 특이사항: 절편이동 허용 (= 외삽 허용)
+    - 3) 합성이중차분법 모델 적합
+        - 모델 적합: (treated, post, treated*post) → Y
+        - 가중치: 개체가중치 * 시간가중치
+
+```python
+df_scdid = (
+    df_norm
+        .assign(tr_post = lambda d: d["post"] * d["treated"])
+        .merge(unit_w, on="city", how="left")
+        .merge(time_w, on="date", how="left")
+        .fillna({"unit_weight": df_norm["treated"].mean(), "time_weight": df_norm["treated"].mean()})
+        .assign(weight = lambda d: d["unit_weight"] * d["time_weight"])
+)
+
+model = smf.wls(
+    "app_download_pct ~ treated * post",
+    data = df_scdid.query("weight >= 1e-10"),
+    weights = df_scdid.query("weight >= 1e-10")["weight"]
+)
+
+model = model.fit()
+print(model.params["treated:post"])
+
+```
+
+- 합성이중차분법 장점
+    - E[Y(0)|D=1]에 대한 가상의 대조군을 만들어 이중차분법에 필요한 평행추세가정이 훨씬 타당해짐
+    - 이중차분법을 사용하여 통제집단합성법은 실험군의 추세를 파악하는데 집중할 수 있음
+    - **이중차분법, 통제집단합성법 대비 추정량의 편향과 분산이 적은 경향**
